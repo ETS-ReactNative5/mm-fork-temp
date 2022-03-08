@@ -2,9 +2,8 @@ import AppEth from '@ledgerhq/hw-app-eth';
 import HDKey from 'hdkey';
 
 const hdPathString = `m/44'/60'/0`;
-const type = 'Ledger Hardware';
-//test
-class LedgerKeyring {
+const type = 'Ledger';
+export default class LedgerKeyring {
 	constructor(opts = {}) {
 		this.deserialize(opts);
 		this.hdk = new HDKey();
@@ -36,6 +35,11 @@ class LedgerKeyring {
 		}
 
 		return this.accounts;
+	};
+
+	getFirstPage = async () => {
+		const page = this.addAccounts(5);
+		return page;
 	};
 
 	unlock = async (hdPath) => {
