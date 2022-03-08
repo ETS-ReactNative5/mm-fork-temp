@@ -3,7 +3,7 @@ import HDKey from 'hdkey';
 
 const hdPathString = `m/44'/60'/0`;
 const type = 'Ledger Hardware';
-
+//test
 class LedgerKeyring {
 	constructor(opts = {}) {
 		this.deserialize(opts);
