@@ -1,0 +1,217 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TokenIcon component should Render correctly 1`] = `
+<RemoteImage
+  fadeIn={true}
+  onError={[Function]}
+  source={
+    Object {
+      "uri": null,
+    }
+  }
+  style={
+    Array [
+      Object {
+        "borderRadius": 12,
+        "height": 24,
+        "width": 24,
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    ]
+  }
+/>
+`;
+
+exports[`TokenIcon component should Render correctly 2`] = `
+<RemoteImage
+  fadeIn={true}
+  onError={[Function]}
+  source={
+    Object {
+      "testUri": "../../../app/images/eth-logo.png",
+    }
+  }
+  style={
+    Array [
+      Object {
+        "borderRadius": 12,
+        "height": 24,
+        "width": 24,
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    ]
+  }
+/>
+`;
+
+exports[`TokenIcon component should Render correctly 3`] = `
+<RemoteImage
+  fadeIn={true}
+  onError={[Function]}
+  source={
+    Object {
+      "uri": null,
+    }
+  }
+  style={
+    Array [
+      Object {
+        "borderRadius": 12,
+        "height": 24,
+        "width": 24,
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    ]
+  }
+/>
+`;
+
+exports[`TokenIcon component should Render correctly 4`] = `
+<RemoteImage
+  fadeIn={true}
+  onError={[Function]}
+  source={
+    Object {
+      "uri": "https://cloudflare-ipfs.com/ipfs/QmNYVMm3iC7HEoxfvxsZbRoapdjDHj9EREFac4BPeVphSJ",
+    }
+  }
+  style={
+    Array [
+      Object {
+        "borderRadius": 12,
+        "height": 24,
+        "width": 24,
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    ]
+  }
+/>
+`;
+
+exports[`TokenIcon component should Render correctly 5`] = `
+<RemoteImage
+  fadeIn={true}
+  onError={[Function]}
+  source={
+    Object {
+      "uri": null,
+    }
+  }
+  style={
+    Array [
+      Object {
+        "borderRadius": 12,
+        "height": 24,
+        "width": 24,
+      },
+      Object {
+        "borderRadius": 18,
+        "height": 36,
+        "width": 36,
+      },
+      undefined,
+      undefined,
+      undefined,
+    ]
+  }
+/>
+`;
+
+exports[`TokenIcon component should Render correctly 6`] = `
+<RemoteImage
+  fadeIn={true}
+  onError={[Function]}
+  source={
+    Object {
+      "testUri": "../../../app/images/eth-logo.png",
+    }
+  }
+  style={
+    Array [
+      Object {
+        "borderRadius": 12,
+        "height": 24,
+        "width": 24,
+      },
+      Object {
+        "borderRadius": 18,
+        "height": 36,
+        "width": 36,
+      },
+      undefined,
+      undefined,
+      undefined,
+    ]
+  }
+/>
+`;
+
+exports[`TokenIcon component should Render correctly 7`] = `
+<RemoteImage
+  fadeIn={true}
+  onError={[Function]}
+  source={
+    Object {
+      "uri": null,
+    }
+  }
+  style={
+    Array [
+      Object {
+        "borderRadius": 12,
+        "height": 24,
+        "width": 24,
+      },
+      Object {
+        "borderRadius": 18,
+        "height": 36,
+        "width": 36,
+      },
+      undefined,
+      undefined,
+      undefined,
+    ]
+  }
+/>
+`;
+
+exports[`TokenIcon component should Render correctly 8`] = `
+<RemoteImage
+  fadeIn={true}
+  onError={[Function]}
+  source={
+    Object {
+      "uri": "https://cloudflare-ipfs.com/ipfs/QmNYVMm3iC7HEoxfvxsZbRoapdjDHj9EREFac4BPeVphSJ",
+    }
+  }
+  style={
+    Array [
+      Object {
+        "borderRadius": 12,
+        "height": 24,
+        "width": 24,
+      },
+      Object {
+        "borderRadius": 18,
+        "height": 36,
+        "width": 36,
+      },
+      undefined,
+      undefined,
+      undefined,
+    ]
+  }
+/>
+`;
