@@ -323,6 +323,7 @@ class Login extends PureComponent {
 	};
 
 	onLogin = async (hasCredentials = false) => {
+		console.log('onlogin');
 		const { password } = this.state;
 		const { current: field } = this.fieldRef;
 		const locked = !passwordRequirementsMet(password);
@@ -331,8 +332,10 @@ class Login extends PureComponent {
 		try {
 			this.setState({ loading: true, error: null });
 			const { KeyringController } = Engine.context;
+			console.log('KeyringController', KeyringController);
 			// Restore vault with user entered password
 			await KeyringController.submitPassword(this.state.password);
+			console.log('after');
 			const encryptionLib = await AsyncStorage.getItem(ENCRYPTION_LIB);
 			const existingUser = await AsyncStorage.getItem(EXISTING_USER);
 			if (encryptionLib !== ORIGINAL && existingUser) {
@@ -364,6 +367,7 @@ class Login extends PureComponent {
 			this.setState({ loading: false, password: '', hasBiometricCredentials: false });
 			field.setValue('');
 		} catch (e) {
+			console.log('here');
 			// Should we force people to enable passcode / biometrics?
 			const error = e.toString();
 			if (

@@ -6,9 +6,9 @@ import {
 	ControllerMessenger,
 	ComposableController,
 	CurrencyRateController,
-	KeyringController,
 	PersonalMessageManager,
 	MessageManager,
+	KeyringController,
 	NetworkController,
 	PhishingController,
 	PreferencesController,
@@ -25,6 +25,7 @@ import {
 	CollectibleDetectionController,
 	ApprovalController,
 } from '@metamask/controllers';
+
 import SwapsController, { swapsUtils } from '@metamask/swaps-controller';
 import AsyncStorage from '@react-native-community/async-storage';
 import Encryptor from './Encryptor';
@@ -173,7 +174,7 @@ class Engine {
 						updateIdentities: preferencesController.updateIdentities.bind(preferencesController),
 						setSelectedAddress: preferencesController.setSelectedAddress.bind(preferencesController),
 					},
-					{ encryptor },
+					{ encryptor, keyringTypes: [LedgerKeyring] },
 					initialState.KeyringController
 				),
 				new AccountTrackerController({

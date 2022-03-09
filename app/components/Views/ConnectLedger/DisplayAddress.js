@@ -1,49 +1,26 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text } from 'react-native';
-import AppEth from '@ledgerhq/hw-app-eth';
 import Engine from '../../../core/Engine';
-
-const delay = (ms) => new Promise((success) => setTimeout(success, ms));
 
 // eslint-disable-next-line
 const DisplayAddress = ({ transport }) => {
-	const { PreferencesController } = Engine.context;
-	const [addresses, setAddresses] = useState([]);
+	const { KeyringController } = Engine.context;
+	const [accounts, setAccounts] = useState([]);
 	const [error, setError] = useState(null);
 
-	const fetchAddress = useCallback(
-		async (verify) => {
-			try {
-				const eth = new AppEth(transport);
-				const { address: address1 } = await eth.getAddress("44'/60'/0'/0/0", verify);
-				const { address: address2 } = await eth.getAddress("44'/60'/1'/0/0", verify);
-				const { address: address3 } = await eth.getAddress("44'/60'/2'/0/0", verify);
-				PreferencesController.updateIdentities([address1, address2, address3]);
-				PreferencesController.setAccountLabel(address1, 'Ledger');
-				PreferencesController.setAccountLabel(address2, 'Ledger');
-				PreferencesController.setAccountLabel(address3, 'Ledger');
-
-				setAddresses([address1, address2, address3]);
-			} catch (error) {
-				// in this case, user is likely not on Ethereum app
-				setError(error);
-			}
-		},
-		[transport]
-	);
-
 	useEffect(() => {
-		const run = async () => {
-			await fetchAddress(false);
-			await delay(500);
-		};
-
-		run();
-	}, [fetchAddress]);
+		console.log('keyringController:', KeyringController);
+		if (transport) {
+			KeyringController.connectLedgerHardware(transport).then((accounts) => {
+				setAccounts(accounts);
+				console.log('accounts', accounts);
+			});
+		}
+	}, [KeyringController, transport]);
 
 	return (
 		<View>
-			{!addresses.length ? (
+			{!accounts.length ? (
 				<>
 					<Text>Loading your Ethereum address...</Text>
 					{error ? (
@@ -56,9 +33,9 @@ const DisplayAddress = ({ transport }) => {
 			) : (
 				<>
 					<Text>Ledger Live Ethereum Account 1</Text>
-					{addresses.map((address, index) => (
-						<Text>
-							{index}. {address}
+					{accounts.map((account, index) => (
+						<Text key={`LedgerAccount-${index}`}>
+							{index}.{account.address}
 						</Text>
 					))}
 				</>

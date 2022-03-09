@@ -4,10 +4,11 @@ import HDKey from 'hdkey';
 const hdPathString = `m/44'/60'/0`;
 const type = 'Ledger';
 export default class LedgerKeyring {
+	static type = type;
+
 	constructor(opts = {}) {
 		this.deserialize(opts);
 		this.hdk = new HDKey();
-		this.type = type;
 	}
 
 	serialize = async () => ({
@@ -38,7 +39,7 @@ export default class LedgerKeyring {
 	};
 
 	getFirstPage = async () => {
-		const page = this.addAccounts(5);
+		const page = await this.addAccounts(5);
 		return page;
 	};
 
