@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import Engine from '../../../core/Engine';
 
 // eslint-disable-next-line
 const DisplayAddress = ({ transport }) => {
-	const { KeyringController } = Engine.context;
+	const { KeyringController, AccountTrackerController } = Engine.context;
 	const [accounts, setAccounts] = useState([]);
+	const [trackedAccounts, setTrackedAccounts] = useState([]);
 	const [error, setError] = useState(null);
 
 	useEffect(() => {
@@ -15,6 +16,27 @@ const DisplayAddress = ({ transport }) => {
 			});
 		}
 	}, [KeyringController, transport]);
+
+	useEffect(() => {
+		const unTrackedAccounts = [];
+
+		accounts.forEach((account) => !trackedAccounts[account.address] && unTrackedAccounts.push(account.address));
+
+		if (unTrackedAccounts.length > 0) {
+			AccountTrackerController.syncWithAddresses(unTrackedAccounts).then((_trackedAccounts) => {
+				setTrackedAccounts(Object.assign({}, trackedAccounts, _trackedAccounts));
+			});
+		}
+	}, [AccountTrackerController, accounts, trackedAccounts]);
+
+	const onUnlock = async () => {
+		console.log('onUnlock', trackedAccounts);
+		for (let i = 0; i < Object.keys(trackedAccounts).length; i++) {
+			console.log('WE ARE HERE');
+			const newState = await KeyringController.unlockLedgerHardwareWalletAccount(i);
+			console.log('keyring state', newState);
+		}
+	};
 
 	return (
 		<View>
@@ -36,6 +58,9 @@ const DisplayAddress = ({ transport }) => {
 							{index}.{account.address}
 						</Text>
 					))}
+					<TouchableOpacity onPress={onUnlock}>
+						<Text>Unlock</Text>
+					</TouchableOpacity>
 				</>
 			)}
 		</View>

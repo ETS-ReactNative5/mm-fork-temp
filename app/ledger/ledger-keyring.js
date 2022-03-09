@@ -10,16 +10,19 @@ export default class LedgerKeyring {
 		this.deserialize(opts);
 		this.hdk = new HDKey();
 		this.type = type;
+		this.unlockedAccountIndex = 0;
 	}
 
 	serialize = async () => ({
 		hdPath: this.hdPath,
 		accounts: this.accounts,
+		unlockedAccountIndex: this.unlockedAccountIndex,
 	});
 
-	deserialize = async ({ hdPath, accounts }) => {
+	deserialize = async ({ hdPath, accounts, unlockedAccountIndex }) => {
 		this.hdPath = hdPath || hdPathString;
 		this.accounts = accounts || [];
+		this.unlockedAccountIndex = unlockedAccountIndex || 0;
 	};
 
 	getAccounts = async () => {
@@ -27,12 +30,21 @@ export default class LedgerKeyring {
 		return accounts;
 	};
 
+	getName = () => type;
+
+	setAccountToUnlock = (accountIndex) => {
+		this.unlockedAccountIndex = accountIndex;
+	};
+
 	addAccounts = async (n = 1) => {
-		for (let i = 0; i < n; i++) {
+		const from = this.unlockedAccountIndex;
+
+		for (let i = from; i < n; i++) {
 			const path = `m/44'/60'/${i}'/0/0`;
 			const address = await this.unlock(path);
 			if (!this.accounts.includes(address)) {
 				this.accounts.push(address);
+				this.unlockedAccountIndex++;
 			}
 		}
 
