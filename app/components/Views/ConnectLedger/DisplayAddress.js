@@ -9,11 +9,9 @@ const DisplayAddress = ({ transport }) => {
 	const [error, setError] = useState(null);
 
 	useEffect(() => {
-		console.log('keyringController:', KeyringController);
 		if (transport) {
 			KeyringController.connectLedgerHardware(transport).then((accounts) => {
 				setAccounts(accounts);
-				console.log('accounts', accounts);
 			});
 		}
 	}, [KeyringController, transport]);

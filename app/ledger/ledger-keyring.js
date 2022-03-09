@@ -9,6 +9,7 @@ export default class LedgerKeyring {
 	constructor(opts = {}) {
 		this.deserialize(opts);
 		this.hdk = new HDKey();
+		this.type = type;
 	}
 
 	serialize = async () => ({
@@ -44,12 +45,12 @@ export default class LedgerKeyring {
 	};
 
 	unlock = async (hdPath) => {
-		const address = await this.app.getAddress(hdPath, false, true);
+		const account = await this.app.getAddress(hdPath, false, true);
 		// eslint-disable-next-line no-undef
-		this.hdk.publicKey = Buffer.from(address.publicKey, 'hex');
+		this.hdk.publicKey = Buffer.from(account.publicKey, 'hex');
 		// eslint-disable-next-line no-undef
-		this.hdk.chainCode = Buffer.from(address.chainCode, 'hex');
-		return address;
+		this.hdk.chainCode = Buffer.from(account.chainCode, 'hex');
+		return account.address;
 	};
 
 	setTransport = (transport) => {
