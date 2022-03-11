@@ -1,8 +1,22 @@
 import AppEth from '@ledgerhq/hw-app-eth';
+import ledgerService from '@ledgerhq/hw-app-eth/lib/services/ledger';
+import HDKey from 'hdkey';
+import {
+	toChecksumAddress,
+	publicToAddress,
+	// BN,
+	// stripHexPrefix,
+} from 'ethereumjs-util';
 import HDKey from 'hdkey';
 
 const hdPathString = `m/44'/60'/0`;
 const type = 'Ledger';
+const KEYRING_MODE = {
+	hd: 'hd',
+	pubkey: 'pubkey',
+};
+const MAX_INDEX = 1000;
+
 export default class LedgerKeyring {
 	static type = type;
 
@@ -11,18 +25,21 @@ export default class LedgerKeyring {
 		this.hdk = new HDKey();
 		this.type = type;
 		this.unlockedAccountIndex = 0;
+		this.addressToHDPath = {};
 	}
 
 	serialize = async () => ({
 		hdPath: this.hdPath,
 		accounts: this.accounts,
 		unlockedAccountIndex: this.unlockedAccountIndex,
+		addressToHDPath: this.addressToHDPath,
 	});
 
-	deserialize = async ({ hdPath, accounts, unlockedAccountIndex }) => {
+	deserialize = async ({ hdPath, accounts, unlockedAccountIndex, addressToHDPath }) => {
 		this.hdPath = hdPath || hdPathString;
 		this.accounts = accounts || [];
 		this.unlockedAccountIndex = unlockedAccountIndex || 0;
+		this.addressToHDPath = addressToHDPath || {};
 	};
 
 	getAccounts = async () => {
@@ -46,6 +63,8 @@ export default class LedgerKeyring {
 				this.accounts.push(address);
 				this.unlockedAccountIndex++;
 			}
+
+			this.addressToHDPath[address] = path;
 		}
 
 		return this.accounts;
@@ -68,5 +87,26 @@ export default class LedgerKeyring {
 	setTransport = (transport) => {
 		this.transport = transport;
 		this.app = new AppEth(this.transport);
+	};
+
+	_getHDPathFromAddress = async (address) => {
+		let hdPath = this.addressToHDPath[address];
+
+		if (typeof hdPath === 'undefined') {
+			throw new Error('Unknown address');
+		}
+
+		return this.hdPath;
+	};
+
+	signTransaction = async (address, tx) => {
+		const hdPath = this._getHDPathFromAddress(address);
+
+		console.log('WE ARE HERE, signTransaction', hdPath, tx);
+		const resolution = await ledgerService.resolveTransaction(tx);
+		console.log('signTransaction.resolution', resolution);
+		const result = await this.app.signTransaction(hdPath, tx, resolution);
+		console.log('signTransaction.resolution', result);
+		return result;
 	};
 }

@@ -806,6 +806,7 @@ class Confirm extends PureComponent {
 	};
 
 	onNext = async () => {
+		console.log('WE ARE HERE. onNext');
 		const { TransactionController } = Engine.context;
 		const {
 			transactionState: { assetType },
@@ -817,7 +818,9 @@ class Confirm extends PureComponent {
 		if (transactionConfirmed) return;
 		this.setState({ transactionConfirmed: true, stopUpdateGas: true });
 		try {
+			console.log('WE ARE HERE. onNext', transactionConfirmed);
 			const transaction = this.prepareTransactionToSend();
+			console.log('WE ARE HERE. onNext', transaction);
 			let error;
 			if (gasEstimateType === GAS_ESTIMATE_TYPES.FEE_MARKET) {
 				error = this.validateAmount({ transaction, total: EIP1559TransactionData.totalMaxHex });
@@ -833,12 +836,16 @@ class Confirm extends PureComponent {
 			const { result, transactionMeta } = await TransactionController.addTransaction(
 				transaction,
 				TransactionTypes.MMM,
-				WalletDevice.MM_MOBILE
+				WalletDevice.OTHER
 			);
+
+			console.log('WE ARE HERE. onNext.result', result);
+			console.log('WE ARE HERE. onNext.transactionMeta', transactionMeta);
 			await TransactionController.approveTransaction(transactionMeta.id);
 			await new Promise((resolve) => resolve(result));
 
 			if (transactionMeta.error) {
+				console.log('WE ARE HERE. onNext.transactionMeta.error', transactionMeta.error);
 				throw transactionMeta.error;
 			}
 
@@ -856,6 +863,7 @@ class Confirm extends PureComponent {
 				navigation && navigation.dangerouslyGetParent()?.pop();
 			});
 		} catch (error) {
+			console.log('WE ARE HERE. onNext.error', error);
 			Alert.alert(strings('transactions.transaction_error'), error && error.message, [
 				{ text: strings('navigation.ok') },
 			]);

@@ -215,6 +215,7 @@ class Approval extends PureComponent {
 	 * Callback on confirm transaction
 	 */
 	onConfirm = async ({ gasEstimateType, EIP1559GasData, gasSelected }) => {
+		console.log('WE ARE HERE. onConfirm');
 		const { TransactionController } = Engine.context;
 		const {
 			transactions,
@@ -254,6 +255,7 @@ class Approval extends PureComponent {
 
 			const fullTx = transactions.find(({ id }) => id === transaction.id);
 			const updatedTx = { ...fullTx, transaction };
+			console.log('WE ARE HERE. Tx: ', transaction.id);
 			await TransactionController.updateTransaction(updatedTx);
 			await TransactionController.approveTransaction(transaction.id);
 			this.showWalletConnectNotification(true);
@@ -343,6 +345,7 @@ class Approval extends PureComponent {
 	render = () => {
 		const { transaction, dappTransactionModalVisible } = this.props;
 		const { mode, transactionConfirmed } = this.state;
+		console.log('WE ARE HERE. Approval');
 		return (
 			<Modal
 				isVisible={dappTransactionModalVisible}
