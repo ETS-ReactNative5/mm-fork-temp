@@ -839,10 +839,12 @@ class Confirm extends PureComponent {
 				WalletDevice.OTHER
 			);
 
-			console.log('WE ARE HERE. onNext.result', result);
 			console.log('WE ARE HERE. onNext.transactionMeta', transactionMeta);
 			await TransactionController.approveTransaction(transactionMeta.id);
-			await new Promise((resolve) => resolve(result));
+			console.log('WE ARE HERE. onNext.postApproveTransaction');
+
+			const promiseResult = await new Promise((resolve) => resolve(result));
+			console.log('WE ARE HERE. onNext.promiseResult', promiseResult);
 
 			if (transactionMeta.error) {
 				console.log('WE ARE HERE. onNext.transactionMeta.error', transactionMeta.error);

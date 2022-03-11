@@ -1,21 +1,9 @@
 import AppEth from '@ledgerhq/hw-app-eth';
 import ledgerService from '@ledgerhq/hw-app-eth/lib/services/ledger';
 import HDKey from 'hdkey';
-import {
-	toChecksumAddress,
-	publicToAddress,
-	// BN,
-	// stripHexPrefix,
-} from 'ethereumjs-util';
-import HDKey from 'hdkey';
 
 const hdPathString = `m/44'/60'/0`;
 const type = 'Ledger';
-const KEYRING_MODE = {
-	hd: 'hd',
-	pubkey: 'pubkey',
-};
-const MAX_INDEX = 1000;
 
 export default class LedgerKeyring {
 	static type = type;
@@ -90,19 +78,27 @@ export default class LedgerKeyring {
 	};
 
 	_getHDPathFromAddress = async (address) => {
-		let hdPath = this.addressToHDPath[address];
+		console.log('WE ARE HERE, _getHDPathFromAddress', this.addressToHDPath);
+		const key = Object.keys(this.addressToHDPath).find((key) => key.toLowerCase() === address.toLowerCase());
+
+		const hdPath = this.addressToHDPath[key];
 
 		if (typeof hdPath === 'undefined') {
+			console.log('WE ARE EXPLODING HERE', hdPath);
+
 			throw new Error('Unknown address');
 		}
 
-		return this.hdPath;
+		return hdPath;
 	};
 
 	signTransaction = async (address, tx) => {
-		const hdPath = this._getHDPathFromAddress(address);
+		console.log('WE ARE HERE, signTransaction.address', address, typeof address);
+		const hdPath = await this._getHDPathFromAddress(address);
 
-		console.log('WE ARE HERE, signTransaction', hdPath, tx);
+		console.log('WE ARE HERE, signTransaction.hdPath', hdPath);
+		console.log('WE ARE HERE, signTransaction.tx', tx);
+
 		const resolution = await ledgerService.resolveTransaction(tx);
 		console.log('signTransaction.resolution', resolution);
 		const result = await this.app.signTransaction(hdPath, tx, resolution);

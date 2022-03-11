@@ -308,13 +308,6 @@ class AccountList extends PureComponent {
 		// This is a temporary fix until we can read the state from @metamask/controllers
 		const allKeyrings = keyrings && keyrings.length ? keyrings : Engine.context.KeyringController.state.keyrings;
 
-		console.log(
-			'allKeyrings',
-			allKeyrings.map((kr) => kr.type)
-		);
-
-		console.log('ledger accounts', allKeyrings.find((kr) => kr.type === 'Ledger').accounts);
-
 		const accountsOrdered = allKeyrings.reduce((list, keyring) => list.concat(keyring.accounts), []);
 		return accountsOrdered
 			.filter((address) => !!identities[toChecksumAddress(address)])
