@@ -1,5 +1,6 @@
 import AppEth from '@ledgerhq/hw-app-eth';
 import ledgerService from '@ledgerhq/hw-app-eth/lib/services/ledger';
+import { rlp, addHexPrefix } from 'ethereumjs-util';
 import HDKey from 'hdkey';
 import { TransactionFactory } from '@ethereumjs/tx';
 
@@ -93,29 +94,38 @@ export default class LedgerKeyring {
 	signTransaction = async (address, tx) => {
 		const hdPath = await this._getHDPathFromAddress(address);
 
+		// console.log(Object.keys(ethUtil).map((x) => `${x}\n`));
+
 		console.log('signTransaction.tx', JSON.stringify(tx, null, 4));
 
-		const serializedTx = tx.serialize().toString('hex');
-		console.log('***** signTransaction.serializedTx', serializedTx);
+		// `getMessageToSign` will return valid RLP for all transaction types
+		const messageToSign = tx.getMessageToSign(false);
+		console.log('**** signTransaction.messageToSign', messageToSign);
 
-		const resolution = await ledgerService.resolveTransaction(serializedTx);
-		console.log('***** signTransaction.resolution', resolution);
+		const rawTxHex = global.Buffer.isBuffer(messageToSign)
+			? messageToSign.toString('hex')
+			: rlp.encode(messageToSign).toString('hex');
 
-		const { r, s, v } = await this.app.signTransaction(hdPath, serializedTx, resolution);
+		const resolution = await ledgerService.resolveTransaction(rawTxHex);
 
-		const txJson = tx.toJSON();
-		txJson.v = `0x${v}`;
-		txJson.s = `0x${s}`;
-		txJson.r = `0x${r}`;
-		txJson.type = tx.type;
+		const { r, s, v } = await this.app.signTransaction(hdPath, rawTxHex, resolution);
 
-		console.log('***** signTransaction.txJson', txJson);
+		// Because tx will be immutable, first get a plain javascript object that
+		// represents the transaction. Using txData here as it aligns with the
+		// nomenclature of ethereumjs/tx.
+		const txData = tx.toJSON();
 
-		const transaction = TransactionFactory.fromTxData(txJson, {
-			common: tx.common,
-		});
+		// The fromTxData utility expects a type to support transactions with a type other than 0
+		txData.type = tx.type;
 
-		console.log('***** signTransaction.hash', transaction.hash().toString('hex'));
+		// The fromTxData utility expects v,r and s to be hex prefixed
+		txData.v = addHexPrefix(v);
+		txData.r = addHexPrefix(r);
+		txData.s = addHexPrefix(s);
+
+		// Adopt the 'common' option from the original transaction and set the
+		// returned object to be frozen if the original is frozen.
+		const transaction = TransactionFactory.fromTxData(txData, { common: tx.common, freeze: Object.isFrozen(tx) });
 
 		console.log('***** signTransaction.transaction', transaction);
 
