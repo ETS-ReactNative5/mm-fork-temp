@@ -1,6 +1,7 @@
 import AppEth from '@ledgerhq/hw-app-eth';
 import ledgerService from '@ledgerhq/hw-app-eth/lib/services/ledger';
 import HDKey from 'hdkey';
+import { TransactionFactory } from '@ethereumjs/tx';
 
 const hdPathString = `m/44'/60'/0`;
 const type = 'Ledger';
@@ -78,14 +79,11 @@ export default class LedgerKeyring {
 	};
 
 	_getHDPathFromAddress = async (address) => {
-		console.log('WE ARE HERE, _getHDPathFromAddress', this.addressToHDPath);
 		const key = Object.keys(this.addressToHDPath).find((key) => key.toLowerCase() === address.toLowerCase());
 
 		const hdPath = this.addressToHDPath[key];
 
 		if (typeof hdPath === 'undefined') {
-			console.log('WE ARE EXPLODING HERE', hdPath);
-
 			throw new Error('Unknown address');
 		}
 
@@ -93,16 +91,34 @@ export default class LedgerKeyring {
 	};
 
 	signTransaction = async (address, tx) => {
-		console.log('WE ARE HERE, signTransaction.address', address, typeof address);
 		const hdPath = await this._getHDPathFromAddress(address);
 
-		console.log('WE ARE HERE, signTransaction.hdPath', hdPath);
-		console.log('WE ARE HERE, signTransaction.tx', tx);
+		console.log('signTransaction.tx', JSON.stringify(tx, null, 4));
 
-		const resolution = await ledgerService.resolveTransaction(tx);
-		console.log('signTransaction.resolution', resolution);
-		const result = await this.app.signTransaction(hdPath, tx, resolution);
-		console.log('signTransaction.resolution', result);
-		return result;
+		const serializedTx = tx.serialize().toString('hex');
+		console.log('***** signTransaction.serializedTx', serializedTx);
+
+		const resolution = await ledgerService.resolveTransaction(serializedTx);
+		console.log('***** signTransaction.resolution', resolution);
+
+		const { r, s, v } = await this.app.signTransaction(hdPath, serializedTx, resolution);
+
+		const txJson = tx.toJSON();
+		txJson.v = `0x${v}`;
+		txJson.s = `0x${s}`;
+		txJson.r = `0x${r}`;
+		txJson.type = tx.type;
+
+		console.log('***** signTransaction.txJson', txJson);
+
+		const transaction = TransactionFactory.fromTxData(txJson, {
+			common: tx.common,
+		});
+
+		console.log('***** signTransaction.hash', transaction.hash().toString('hex'));
+
+		console.log('***** signTransaction.transaction', transaction);
+
+		return transaction;
 	};
 }
