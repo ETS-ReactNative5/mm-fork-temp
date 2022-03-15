@@ -1,6 +1,7 @@
 import AppEth from '@ledgerhq/hw-app-eth';
 import ledgerService from '@ledgerhq/hw-app-eth/lib/services/ledger';
-import { rlp, addHexPrefix } from 'ethereumjs-util';
+import { rlp, addHexPrefix, toChecksumAddress, stripHexPrefix } from 'ethereumjs-util';
+import { recoverPersonalSignature } from 'eth-sig-util';
 import HDKey from 'hdkey';
 import { TransactionFactory } from '@ethereumjs/tx';
 
@@ -91,16 +92,37 @@ export default class LedgerKeyring {
 		return hdPath;
 	};
 
+	signMessage = async (account, message) => this.signPersonalMessage(account, message);
+
+	signPersonalMessage = async (account, message) => {
+		const hdPath = await this._getHDPathFromAddress(account);
+		const messageWithoutHexPrefix = stripHexPrefix(message);
+
+		const { r, s, v } = await this.app.signPersonalMessage(hdPath, messageWithoutHexPrefix);
+
+		// Read this, to understand the math below: https://medium.com/mycrypto/the-magic-of-digital-signatures-on-ethereum-98fe184dc9c7
+		let modifiedV = v - 27;
+		modifiedV = modifiedV.toString(16);
+
+		if (modifiedV.length < 2) {
+			modifiedV = `0${modifiedV}`;
+		}
+
+		const signature = `0x${r}${s}${modifiedV}`;
+		const addressSignedWith = recoverPersonalSignature({ data: message, sig: signature });
+
+		if (toChecksumAddress(addressSignedWith) !== toChecksumAddress(account)) {
+			throw new Error("Ledger: The signature doesn't match the right address");
+		}
+
+		return signature;
+	};
+
 	signTransaction = async (address, tx) => {
 		const hdPath = await this._getHDPathFromAddress(address);
 
-		// console.log(Object.keys(ethUtil).map((x) => `${x}\n`));
-
-		console.log('signTransaction.tx', JSON.stringify(tx, null, 4));
-
 		// `getMessageToSign` will return valid RLP for all transaction types
 		const messageToSign = tx.getMessageToSign(false);
-		console.log('**** signTransaction.messageToSign', messageToSign);
 
 		const rawTxHex = global.Buffer.isBuffer(messageToSign)
 			? messageToSign.toString('hex')
@@ -126,8 +148,6 @@ export default class LedgerKeyring {
 		// Adopt the 'common' option from the original transaction and set the
 		// returned object to be frozen if the original is frozen.
 		const transaction = TransactionFactory.fromTxData(txData, { common: tx.common, freeze: Object.isFrozen(tx) });
-
-		console.log('***** signTransaction.transaction', transaction);
 
 		return transaction;
 	};
