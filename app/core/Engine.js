@@ -38,7 +38,7 @@ import NotificationManager from './NotificationManager';
 import Logger from '../util/Logger';
 import { LAST_INCOMING_TX_BLOCK_INFO } from '../constants/storage';
 import { isZero } from '../util/lodash';
-import LedgerKeyring from '../ledger/ledger-keyring';
+import LedgerKeyring from '../ledger/ledger-keyring2';
 
 const NON_EMPTY = 'NON_EMPTY';
 

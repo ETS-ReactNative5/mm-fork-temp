@@ -5,42 +5,31 @@ import Engine from '../../../core/Engine';
 // eslint-disable-next-line
 const DisplayAddress = ({ transport }) => {
 	const { KeyringController, AccountTrackerController } = Engine.context;
-	const [accounts, setAccounts] = useState([]);
-	const [trackedAccounts, setTrackedAccounts] = useState([]);
+	const [defaultAccount, setDefaultAccount] = useState(null);
 	const [error, setError] = useState(null);
 
 	useEffect(() => {
 		if (transport) {
+			// Display the default account on the UI
 			KeyringController.connectLedgerHardware(transport).then((accounts) => {
-				setAccounts(accounts);
+				setDefaultAccount(accounts[0]);
 			});
 		}
 	}, [KeyringController, transport]);
 
 	useEffect(() => {
-		const unTrackedAccounts = [];
-
-		accounts.forEach((account) => !trackedAccounts[account.address] && unTrackedAccounts.push(account.address));
-
-		if (unTrackedAccounts.length > 0) {
-			AccountTrackerController.syncWithAddresses(unTrackedAccounts).then((_trackedAccounts) => {
-				setTrackedAccounts(Object.assign({}, trackedAccounts, _trackedAccounts));
-			});
-		}
-	}, [AccountTrackerController, accounts, trackedAccounts]);
+		AccountTrackerController.syncWithAddresses([defaultAccount]);
+	}, [AccountTrackerController, defaultAccount]);
 
 	const onUnlock = async () => {
-		console.log('onUnlock', trackedAccounts);
-		for (let i = 0; i < Object.keys(trackedAccounts).length; i++) {
-			console.log('WE ARE HERE');
-			const newState = await KeyringController.unlockLedgerHardwareWalletAccount(i);
-			console.log('keyring state', newState);
-		}
+		console.log('onUnlock', defaultAccount);
+		const newState = await KeyringController.unlockLedgerDefaultAccount();
+		console.log('keyring state', JSON.stringify(newState, null, 4));
 	};
 
 	return (
 		<View>
-			{!accounts.length ? (
+			{!defaultAccount ? (
 				<>
 					<Text>Loading your Ethereum address...</Text>
 					{error ? (
@@ -53,11 +42,7 @@ const DisplayAddress = ({ transport }) => {
 			) : (
 				<>
 					<Text>Ledger Live Ethereum Account 1</Text>
-					{accounts.map((account, index) => (
-						<Text key={`LedgerAccount-${index}`}>
-							{index}.{account.address}
-						</Text>
-					))}
+					<Text>{defaultAccount.address}</Text>
 					<TouchableOpacity onPress={onUnlock}>
 						<Text>Unlock</Text>
 					</TouchableOpacity>
